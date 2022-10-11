@@ -10,9 +10,9 @@ class GANTrainer:
                  generator: torch.nn.Module, 
                  discriminator: torch.nn.Module, 
                  device: str, 
+                 dataloader: torch.utils.data.DataLoader,
                  g_lr: float=2e-4, 
                  d_lr: float=2e-4,
-                 batch_size: int=64,
                  g_optimizer: Type[torch.optim.Optimizer]=torch.optim.Adam,
                  d_optimizer: Type[torch.optim.Optimizer]=torch.optim.Adam,
                  logger: BaseLogger=ConsoleLogger(__name__)):
@@ -21,7 +21,8 @@ class GANTrainer:
         self.d_lr = d_lr
         self.generator = generator.to(self.device)
         self.discriminator = discriminator.to(self.device)
-        self.batch_size = batch_size
+        self.dataloader = dataloader
+        self.batch_size = dataloader.batch_size
         self.logger = logger
         
         self.true_label = self.make_true_label(self.batch_size)
@@ -91,7 +92,6 @@ class GANTrainer:
                         img=self.toImage(imgs)))
     
     def run(self, 
-            dataloader: torch.utils.data.DataLoader, 
             epochs: int=10, 
             num_train_dis: int=1):
         self.generator.train()
@@ -99,6 +99,6 @@ class GANTrainer:
         
         self.logger.on_epoch_start()
         for _ in range(epochs):
-            self.update_trainer(num_train_dis, dataloader)    
+            self.update_trainer(num_train_dis, self.dataloader)    
         
         self.logger.on_epoch_end()

@@ -29,7 +29,7 @@ generator = MNISTGenerator()
 discriminator = MNISTDiscriminator()
 trainer = GANTrainer(generator=generator,
                      discriminator=discriminator,
-                     device=device)
+                     device=device,
+                     dataloader=dataloader)
 trainer.run(epochs=args['epochs'], 
-            num_train_dis=args['num_train_discriminator'], 
-            dataloader=dataloader)
+            num_train_dis=args['num_train_discriminator'])
