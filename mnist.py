@@ -15,10 +15,16 @@ args = vars(parser.parse_args())
 
 device = args["device"]
 
+transforms = torchvision.transforms.Compose(
+    torchvision.transforms.ToTensor(),
+    torchvision.transforms.Normalize((0,), (255,))
+)
+
 mnist = torchvision.datasets.MNIST("./data", download=True)
 dataloader = torch.utils.data.DataLoader(mnist, 
                                          batch_size=args["batch_size"], 
-                                         shuffle=True)
+                                         shuffle=True,
+                                         transforms=transforms)
 
 generator = MNISTGenerator()
 discriminator = MNISTDiscriminator()
