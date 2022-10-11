@@ -25,4 +25,6 @@ discriminator = MNISTDiscriminator()
 trainer = GANTrainer(generator=generator,
                      discriminator=discriminator,
                      device=device)
-trainer.run(epochs=args['epochs'], num_train_dis=args['num_train_discriminator'])
+trainer.run(epochs=args['epochs'], 
+            num_train_dis=args['num_train_discriminator'], 
+            dataloader=dataloader)
