@@ -20,11 +20,10 @@ transforms = torchvision.transforms.Compose([
     torchvision.transforms.Normalize((0,), (255,))
 ])
 
-mnist = torchvision.datasets.MNIST("./data", download=True)
+mnist = torchvision.datasets.MNIST("./data", download=True, transform=transforms)
 dataloader = torch.utils.data.DataLoader(mnist, 
                                          batch_size=args["batch_size"], 
-                                         shuffle=True,
-                                         transforms=transforms)
+                                         shuffle=True)
 
 generator = MNISTGenerator()
 discriminator = MNISTDiscriminator()
