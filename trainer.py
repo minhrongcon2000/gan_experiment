@@ -89,7 +89,7 @@ class GANTrainer:
         imgs = torchvision.utils.make_grid(imgs)
         self.logger.log(dict(d_loss=d_error / (i + 1),
                         g_loss=g_error / (i + 1),
-                        img=self.toImage(imgs)))
+                        image=self.toImage(imgs)))
     
     def run(self, 
             epochs: int=10, 
