@@ -54,18 +54,24 @@ class ConsoleLogger(BaseLogger):
         print(self.get_log(LogType.INFO, "Training Finished!"))
         
 
-class WandbLogger(BaseLogger):
-    def __init__(self, logger_name):
+class WandbLogger(ConsoleLogger):
+    def __init__(self, logger_name, wandb_api_key, project_name=None, run_name=None):
         super().__init__(logger_name)
+        self.project_name = project_name
+        self.run_name = run_name
+        self.wandb_api_key = wandb_api_key
 
-    def on_epoch_start(self, wandb_api_key, project_name, run_name):
-        os.environ["WANDB_API_KEY"] = wandb_api_key
+    def on_epoch_start(self):
+        super().on_epoch_start()
+        os.environ["WANDB_API_KEY"] = self.wandb_api_key
         if wandb.run is None:
-            wandb.init(project=project_name, name=run_name)
+            wandb.init(project=self.project_name, name=self.run_name)
         
     def log(self, msg_obj):
+        super().log(msg_obj)
         msg_obj["image"] = wandb.Image(msg_obj["image"])
         wandb.log(msg_obj)
     
     def on_epoch_end(self):
+        super().on_epoch_end()
         wandb.finish()
