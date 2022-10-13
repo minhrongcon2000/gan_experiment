@@ -44,15 +44,15 @@ class GANTrainer:
     
     def train_discriminator(self, real_data, fake_data):
         self.d_opt.zero_grad()
-        
         prediction_real = self.discriminator(real_data)
         error_real = self.criterion(prediction_real, self.true_label)
         error_real.backward()
+        self.d_opt.step()
         
+        self.d_opt.zero_grad()
         prediction_fake = self.discriminator(fake_data)
         error_fake = self.criterion(prediction_fake, self.fake_label)
         error_fake.backward()
-        
         self.d_opt.step()
         
         return error_real + error_fake
