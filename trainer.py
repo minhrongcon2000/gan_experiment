@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Dict, Type
 import torch
 import torchvision
 
@@ -11,14 +11,14 @@ class GANTrainer:
                  discriminator: torch.nn.Module, 
                  device: str, 
                  dataloader: torch.utils.data.DataLoader,
-                 g_lr: float=2e-4, 
-                 d_lr: float=2e-4,
                  g_optimizer: Type[torch.optim.Optimizer]=torch.optim.Adam,
+                 g_opt_kwargs: Dict=dict(lr=2e-4), 
+                 d_opt_kwargs: Dict=dict(lr=2e-4),
                  d_optimizer: Type[torch.optim.Optimizer]=torch.optim.Adam,
                  logger: BaseLogger=ConsoleLogger(__name__)):
         self.device = device
-        self.g_lr = g_lr
-        self.d_lr = d_lr
+        self.g_opt_kwargs = g_opt_kwargs
+        self.d_opt_kwargs = d_opt_kwargs
         self.generator = generator.to(self.device)
         self.discriminator = discriminator.to(self.device)
         self.dataloader = dataloader
@@ -28,8 +28,8 @@ class GANTrainer:
         self.true_label = self.make_true_label(self.batch_size)
         self.fake_label = self.make_fake_label(self.batch_size)
         self.criterion = torch.nn.BCELoss()
-        self.g_opt = g_optimizer(self.generator.parameters(), lr=self.g_lr)
-        self.d_opt = d_optimizer(self.discriminator.parameters(), lr=self.d_lr)
+        self.g_opt = g_optimizer(self.generator.parameters(), **self.g_opt_kwargs)
+        self.d_opt = d_optimizer(self.discriminator.parameters(), **self.d_opt_kwargs)
         self.test_noise = self.make_noise(64, self.generator.input_dim)
         self.toImage = torchvision.transforms.ToPILImage()
         
