@@ -10,4 +10,4 @@ class Maxout(torch.nn.Module):
         self.linear = torch.nn.Linear(input_dim, self.num_piece * self.num_unit)
         
     def forward(self, X):
-        return self.linear(X).reshape(-1, self.num_unit, self.num_piece).max(dim=2).values
+        return self.linear(X).view(-1, self.num_piece, self.num_unit).max(dim=1)[0]
