@@ -1,6 +1,7 @@
 import torch
 
 
+# Implement maxout layers according to https://arxiv.org/abs/1302.4389v4
 class Maxout(torch.nn.Module):
     def __init__(self, input_dim=784, num_piece=2, num_unit=240):
         super().__init__()
