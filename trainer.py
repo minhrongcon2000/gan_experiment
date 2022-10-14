@@ -1,40 +1,37 @@
-from typing import Dict, Type
+from typing import Any, Dict, Type
 import torch
 import torchvision
+from builder import ModelBuilder
 
 from logger import BaseLogger, ConsoleLogger
 
 
 class GANTrainer:
     def __init__(self, 
-                 generator: torch.nn.Module, 
-                 discriminator: torch.nn.Module, 
-                 device: str, 
+                 generator_builder: ModelBuilder,
+                 discriminator_builder: ModelBuilder,
+                 noise_distribution: torch.distributions.Distribution,
                  dataloader: torch.utils.data.DataLoader,
-                 g_optimizer: Type[torch.optim.Optimizer]=torch.optim.Adam,
-                 g_opt_kwargs: Dict=dict(lr=2e-4), 
-                 d_opt_kwargs: Dict=dict(lr=2e-4),
-                 d_optimizer: Type[torch.optim.Optimizer]=torch.optim.Adam,
-                 logger: BaseLogger=ConsoleLogger(__name__)):
+                 device: str,
+                 logger: BaseLogger=ConsoleLogger(__name__)) -> None:
         self.device = device
-        self.g_opt_kwargs = g_opt_kwargs
-        self.d_opt_kwargs = d_opt_kwargs
-        self.generator = generator.to(self.device)
-        self.discriminator = discriminator.to(self.device)
+        self.generator_builder = generator_builder
+        self.discriminator_builder = discriminator_builder
         self.dataloader = dataloader
         self.batch_size = dataloader.batch_size
         self.logger = logger
+        self.noise_distribution = noise_distribution
         
         self.true_label = self.make_true_label(self.batch_size)
         self.fake_label = self.make_fake_label(self.batch_size)
         self.criterion = torch.nn.BCELoss()
-        self.g_opt = g_optimizer(self.generator.parameters(), **self.g_opt_kwargs)
-        self.d_opt = d_optimizer(self.discriminator.parameters(), **self.d_opt_kwargs)
+        self.generator, self.g_opt, self.g_scheduler = self.generator_builder.build()
+        self.discriminator, self.d_opt, self.d_scheduler = self.discriminator_builder.build()
         self.test_noise = self.make_noise(64, self.generator.input_dim)
         self.toImage = torchvision.transforms.ToPILImage()
         
     def make_noise(self, batch_size, latent_dim):
-        return torch.randn(batch_size, latent_dim, device=self.device)
+        return self.noise_distribution.sample((batch_size, latent_dim)).to(self.device)
     
     def make_true_label(self, batch_size):
         return torch.ones(batch_size, 1, device=self.device)
@@ -83,6 +80,12 @@ class GANTrainer:
             # Train generator afterwards
             fake_data = self.generator(self.make_noise(self.batch_size, self.generator.input_dim))
             g_error += self.train_generator(fake_data)
+            
+        if self.g_scheduler is not None:
+            self.g_scheduler.step()
+        
+        if self.d_scheduler is not None:
+            self.d_scheduler.step()
             
         # generate test image since GAN does not have performance guarantee
         imgs = self.generator(self.test_noise).cpu().detach()

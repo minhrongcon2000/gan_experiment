@@ -1,3 +1,5 @@
+# Implement based on Ian Goodfellow repo. https://github.com/goodfeli/adversarial
+
 import torch
 import argparse
 import torchvision
@@ -33,14 +35,15 @@ logger = ConsoleLogger(__name__) if args['logger_type'] == 'console' else WandbL
 
 generator = MNISTGenerator()
 discriminator = MNISTDiscriminator()
-trainer = GANTrainer(generator=generator,
-                     discriminator=discriminator,
-                     device=device,
-                     dataloader=dataloader,
-                     logger=logger,
-                     d_optimizer=torch.optim.SGD,
-                     g_optimizer=torch.optim.SGD,
-                     g_opt_kwargs=dict(lr=0.1, momentum=0.5),
-                     d_opt_kwargs=dict(lr=0.1, momentum=0.5))
-trainer.run(epochs=args['epochs'], 
-            num_train_dis=args['num_train_discriminator'])
+noise_distribution = torch.distributions.Uniform(-torch.sqrt(3.0), torch.sqrt(3.0))
+# trainer = GANTrainer(generator=generator,
+#                      discriminator=discriminator,
+#                      device=device,
+#                      dataloader=dataloader,
+#                      logger=logger,
+#                      d_optimizer=torch.optim.SGD,
+#                      g_optimizer=torch.optim.SGD,
+#                      g_opt_kwargs=dict(lr=0.1, momentum=0.5),
+#                      d_opt_kwargs=dict(lr=0.1, momentum=0.5))
+# trainer.run(epochs=args['epochs'], 
+#             num_train_dis=args['num_train_discriminator'])
