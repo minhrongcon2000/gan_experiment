@@ -68,7 +68,6 @@ trainer = GANTrainer(generator_builder=generator_builder,
                      discriminator_builder=discriminator_builder,
                      device=device,
                      dataloader=dataloader,
-                     logger=logger,
-                     dataloader=dataloader)
+                     logger=logger)
 trainer.run(epochs=args['epochs'], 
             num_train_dis=args['num_train_discriminator'])
