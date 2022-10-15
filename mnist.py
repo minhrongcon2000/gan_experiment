@@ -3,11 +3,13 @@
 import torch
 import argparse
 import torchvision
+from builder import ModelBuilder
 
 from generator import MNISTGenerator
 from discriminator import MNISTDiscriminator
 from logger import ConsoleLogger, WandbLogger
 from trainer import GANTrainer
+from utils.scheduler import ExponentialLRScheduler, MomentumScheduler
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=str, default="cpu")
@@ -36,14 +38,37 @@ logger = ConsoleLogger(__name__) if args['logger_type'] == 'console' else WandbL
 generator = MNISTGenerator()
 discriminator = MNISTDiscriminator()
 noise_distribution = torch.distributions.Uniform(-torch.sqrt(3.0), torch.sqrt(3.0))
-# trainer = GANTrainer(generator=generator,
-#                      discriminator=discriminator,
-#                      device=device,
-#                      dataloader=dataloader,
-#                      logger=logger,
-#                      d_optimizer=torch.optim.SGD,
-#                      g_optimizer=torch.optim.SGD,
-#                      g_opt_kwargs=dict(lr=0.1, momentum=0.5),
-#                      d_opt_kwargs=dict(lr=0.1, momentum=0.5))
-# trainer.run(epochs=args['epochs'], 
-#             num_train_dis=args['num_train_discriminator'])
+generator_builder = ModelBuilder(generator, torch.optim.SGD, dict(
+    lr=0.1,
+    momentum=0.5
+))
+generator_builder.register_scheduler(ExponentialLRScheduler, dict(
+    decay_factor=1 / 1.000004,
+    min_lr=0.000001
+))
+generator_builder.register_scheduler(MomentumScheduler, dict(
+    start=1,
+    saturate=250,
+    final_momentum=0.7
+))
+discriminator_builder = ModelBuilder(generator, torch.optim.SGD, dict(
+    lr=0.1,
+    momentum=0.5
+))
+discriminator_builder.register_scheduler(ExponentialLRScheduler, dict(
+    decay_factor=1 / 1.000004,
+    min_lr=0.000001
+))
+discriminator_builder.register_scheduler(MomentumScheduler, dict(
+    start=1,
+    saturate=250,
+    final_momentum=0.7
+))
+trainer = GANTrainer(generator_builder=generator_builder,
+                     discriminator_builder=discriminator_builder,
+                     device=device,
+                     dataloader=dataloader,
+                     logger=logger,
+                     dataloader=dataloader)
+trainer.run(epochs=args['epochs'], 
+            num_train_dis=args['num_train_discriminator'])

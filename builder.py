@@ -1,22 +1,24 @@
 from sched import scheduler
-from typing import Any, Dict, Type
+from typing import Any, Dict, List, Type
 import torch
+
+from utils.scheduler import BaseScheduler
 
 
 class ModelBuilder:
     def __init__(self, 
                  model: torch.nn.Module, 
                  optimizer: Type[torch.optim.Optimizer], 
-                 optimizer_kwargs: Dict[str, Any],
-                 scheduler: Type[torch.optim.lr_scheduler._LRScheduler]=None,
-                 scheduler_kwargs: Dict[str, Any]=None) -> None:
+                 optimizer_kwargs: Dict[str, Any]) -> None:
         self.model = model
-        self.optimizer = optimizer
-        self.optimizer_kwargs = optimizer_kwargs
-        self.scheduler = scheduler
-        self.scheduler_kwargs = scheduler_kwargs
+        self.optimizer = optimizer(self.model.parameters(), **optimizer_kwargs)
+        self.schedulers: List[BaseScheduler] = []
+        
+    def register_scheduler(self, 
+                      scheduler: Type[BaseScheduler], 
+                      scheduler_kwargs: Dict[str, Any]):
+        new_scheduler = scheduler(self.optimizer, **scheduler_kwargs)
+        self.schedulers.append(new_scheduler)
         
     def build(self):
-        if scheduler is None:
-            return self.model, self.optimizer(self.model.parameters(), **self.optimizer_kwargs), None
-        return self.model, self.optimizer(self.model.parameters(), **self.optimizer_kwargs), self.scheduler(self.optimizer, **self.scheduler_kwargs)
+        return self.model, self.optimizer, self.schedulers

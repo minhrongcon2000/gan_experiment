@@ -27,6 +27,8 @@ class GANTrainer:
         self.criterion = torch.nn.BCELoss()
         self.generator, self.g_opt, self.g_scheduler = self.generator_builder.build()
         self.discriminator, self.d_opt, self.d_scheduler = self.discriminator_builder.build()
+        self.generator = self.generator.to(self.device)
+        self.discriminator = self.discriminator.to(self.device)
         self.test_noise = self.make_noise(64, self.generator.input_dim)
         self.toImage = torchvision.transforms.ToPILImage()
         
@@ -52,6 +54,9 @@ class GANTrainer:
         error_fake.backward()
         self.d_opt.step()
         
+        for scheduler in self.d_scheduler:
+            scheduler.step()
+        
         return error_real + error_fake
     
     def train_generator(self, fake_data):
@@ -62,6 +67,9 @@ class GANTrainer:
         error.backward()
         
         self.g_opt.step()
+        
+        for scheduler in self.g_scheduler:
+            scheduler.step()
         
         return error
     
@@ -81,18 +89,15 @@ class GANTrainer:
             fake_data = self.generator(self.make_noise(self.batch_size, self.generator.input_dim))
             g_error += self.train_generator(fake_data)
             
-        if self.g_scheduler is not None:
-            self.g_scheduler.step()
-        
-        if self.d_scheduler is not None:
-            self.d_scheduler.step()
-            
         # generate test image since GAN does not have performance guarantee
         imgs = self.generator(self.test_noise).cpu().detach()
         imgs = torchvision.utils.make_grid(imgs)
-        self.logger.log(dict(d_loss=d_error / (i + 1),
-                        g_loss=g_error / (i + 1),
-                        image=self.toImage(imgs)))
+        msg = dict(d_loss=d_error / (i + 1),
+                   g_loss=g_error / (i + 1),
+                   image=self.toImage(imgs),
+                   model=self.generator,
+                   model_dir="model")
+        self.logger.log(msg)
     
     def run(self, 
             epochs: int=10, 
