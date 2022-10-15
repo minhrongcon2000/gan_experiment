@@ -95,7 +95,7 @@ class GANTrainer:
         msg = dict(d_loss=d_error / (i + 1),
                    g_loss=g_error / (i + 1),
                    image=self.toImage(imgs),
-                   model=self.generator,
+                   generator=self.generator,
                    model_dir="model")
         self.logger.log(msg)
     
