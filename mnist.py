@@ -3,6 +3,7 @@
 import torch
 import argparse
 import torchvision
+import numpy as np
 from builder import ModelBuilder
 
 from generator import MNISTGenerator
@@ -37,7 +38,7 @@ logger = ConsoleLogger(__name__) if args['logger_type'] == 'console' else WandbL
 
 generator = MNISTGenerator()
 discriminator = MNISTDiscriminator()
-noise_distribution = torch.distributions.Uniform(-torch.sqrt(3.0), torch.sqrt(3.0))
+noise_distribution = torch.distributions.Uniform(-np.sqrt(3.0), np.sqrt(3.0))
 generator_builder = ModelBuilder(generator, torch.optim.SGD, dict(
     lr=0.1,
     momentum=0.5
