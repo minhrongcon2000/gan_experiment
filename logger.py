@@ -78,6 +78,7 @@ class WandbLogger(ConsoleLogger):
             g_loss=msg_obj['g_loss'],
             image=msg_obj["image"]
         ))
+        wandb.save(os.path.join(msg_obj["model_dir"], "generator.pth"))
     
     def on_epoch_end(self):
         super().on_epoch_end()
