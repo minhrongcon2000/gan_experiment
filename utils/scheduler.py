@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import torch
+import numpy as np
 
 
 class BaseScheduler(ABC):
@@ -27,7 +28,7 @@ class MomentumScheduler(BaseScheduler):
     def step(self):
         self._step_counter += 1
         alpha = (self._step_counter - self.start) / (self.saturate - self.start)
-        alpha = torch.clamp(alpha, 0, 1)
+        alpha = float(np.clip(alpha, 0, 1))
         for group in self.optimizer.param_groups:
             group['momentum'] = (1 - alpha) * group['momentum'] + alpha * self.final_momentum
             
