@@ -52,7 +52,7 @@ generator_builder.register_scheduler(MomentumScheduler, dict(
     saturate=250,
     final_momentum=0.7
 ))
-discriminator_builder = ModelBuilder(generator, torch.optim.SGD, dict(
+discriminator_builder = ModelBuilder(discriminator, torch.optim.SGD, dict(
     lr=0.1,
     momentum=0.5
 ))

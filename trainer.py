@@ -1,4 +1,4 @@
-from typing import Any, Dict, Type
+from typing import Any, Dict
 import torch
 import torchvision
 from builder import ModelBuilder
