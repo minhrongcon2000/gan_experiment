@@ -73,6 +73,18 @@ class GANTrainer:
         
         return error
     
+    def _log(self, d_error, g_error, image_freq, current_epoch):
+        # generate test image since GAN does not have performance guarantee
+        imgs = self.generator(self.test_noise).cpu().detach()
+        imgs = torchvision.utils.make_grid(imgs)
+        msg = dict(d_loss=d_error,
+                   g_loss=g_error,
+                   generator=self.generator,
+                   model_dir="model")
+        if current_epoch % image_freq == 0:
+            msg['image'] = self.toImage(imgs)
+        self.logger.log(msg)
+    
     def update_trainer(self, num_train_dis, dataloader):
         g_error = 0
         d_error = 0
@@ -89,24 +101,18 @@ class GANTrainer:
             fake_data = self.generator(self.make_noise(self.batch_size, self.generator.input_dim))
             g_error += self.train_generator(fake_data)
             
-        # generate test image since GAN does not have performance guarantee
-        imgs = self.generator(self.test_noise).cpu().detach()
-        imgs = torchvision.utils.make_grid(imgs)
-        msg = dict(d_loss=d_error / (i + 1),
-                   g_loss=g_error / (i + 1),
-                   image=self.toImage(imgs),
-                   generator=self.generator,
-                   model_dir="model")
-        self.logger.log(msg)
+        return d_error / (i + 1), g_error / (i + 1)
     
     def run(self, 
             epochs: int=10, 
             num_train_dis: int=1):
         self.generator.train()
         self.discriminator.train()
+        image_freq = int(epochs / 50) + 1 # ensure max 50 image log for wandb standard
         
         self.logger.on_epoch_start()
-        for _ in range(epochs):
-            self.update_trainer(num_train_dis, self.dataloader)    
+        for i in range(epochs):
+            d_error, g_error = self.update_trainer(num_train_dis, self.dataloader)    
+            self._log(d_error, g_error, image_freq, i)
         
         self.logger.on_epoch_end()

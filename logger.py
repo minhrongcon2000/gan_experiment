@@ -69,7 +69,8 @@ class WandbLogger(ConsoleLogger):
         
     def log(self, msg_obj):
         super().log(msg_obj)
-        msg_obj["image"] = wandb.Image(msg_obj["image"])
+        if "image" in msg_obj:
+            msg_obj["image"] = wandb.Image(msg_obj["image"])
         if not os.path.exists(msg_obj["model_dir"]):
             os.makedirs(msg_obj["model_dir"])
         torch.save(msg_obj["generator"].state_dict(), os.path.join(msg_obj["model_dir"], "generator.pth"))
