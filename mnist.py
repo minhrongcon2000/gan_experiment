@@ -10,7 +10,7 @@ from generator import MNISTGenerator
 from discriminator import MNISTDiscriminator
 from logger import ConsoleLogger, WandbLogger
 from trainer import GANTrainer
-from utils.scheduler import ExponentialLRScheduler, MomentumScheduler
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--device", type=str, default="cpu")
@@ -39,22 +39,10 @@ logger = ConsoleLogger(__name__) if args['logger_type'] == 'console' else WandbL
 generator = MNISTGenerator()
 discriminator = MNISTDiscriminator()
 noise_distribution = torch.distributions.Uniform(-np.sqrt(3.0), np.sqrt(3.0))
-generator_builder = ModelBuilder(generator, torch.optim.SGD, dict(
-    lr=0.1,
-    momentum=0.5
-))
-generator_builder.register_scheduler(ExponentialLRScheduler, dict(
-    decay_factor=1 / 1.000004,
-    min_lr=0.000001
-))
-discriminator_builder = ModelBuilder(discriminator, torch.optim.SGD, dict(
-    lr=0.1,
-    momentum=0.5
-))
-discriminator_builder.register_scheduler(ExponentialLRScheduler, dict(
-    decay_factor=1 / 1.000004,
-    min_lr=0.000001
-))
+generator_builder = ModelBuilder(generator, torch.optim.Adam, dict(lr=0.01))
+generator_builder.register_scheduler(torch.optim.lr_scheduler.ExponentialLR, dict(gamma=0.5))
+discriminator_builder = ModelBuilder(discriminator, torch.optim.Adam, dict(lr=0.01))
+discriminator_builder.register_scheduler(torch.optim.lr_scheduler.ExponentialLR, dict(gamma=0.5))
 trainer = GANTrainer(generator_builder=generator_builder,
                      discriminator_builder=discriminator_builder,
                      device=device,

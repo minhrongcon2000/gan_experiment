@@ -15,19 +15,16 @@ class MNISTDiscriminator(torch.nn.Module):
         self.h0 = torch.nn.Sequential(
             Maxout(self.input_dim, 5, 240), 
             torch.nn.Dropout(0.8), 
-            InputScaling(1.25)
         )
         
         self.h1 = torch.nn.Sequential(
             Maxout(240, 5, 240),
             torch.nn.Dropout(0.5), 
-            InputScaling(2.0)
         )
         
         self.y = torch.nn.Sequential(
             torch.nn.Linear(240, self.output_dim),
             torch.nn.Dropout(0.5),
-            InputScaling(2.0),
             torch.nn.Sigmoid()
         )
         
