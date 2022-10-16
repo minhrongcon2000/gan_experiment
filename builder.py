@@ -1,5 +1,4 @@
-from sched import scheduler
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Type, Union
 import torch
 
 from utils.scheduler import BaseScheduler
@@ -15,7 +14,7 @@ class ModelBuilder:
         self.schedulers: List[BaseScheduler] = []
         
     def register_scheduler(self, 
-                      scheduler: Type[BaseScheduler], 
+                      scheduler: Union[Type[BaseScheduler], Type[torch.optim.lr_scheduler._LRScheduler]], 
                       scheduler_kwargs: Dict[str, Any]):
         new_scheduler = scheduler(self.optimizer, **scheduler_kwargs)
         self.schedulers.append(new_scheduler)

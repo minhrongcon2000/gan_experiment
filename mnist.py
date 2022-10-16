@@ -47,11 +47,6 @@ generator_builder.register_scheduler(ExponentialLRScheduler, dict(
     decay_factor=1 / 1.000004,
     min_lr=0.000001
 ))
-generator_builder.register_scheduler(MomentumScheduler, dict(
-    start=1,
-    saturate=250,
-    final_momentum=0.7
-))
 discriminator_builder = ModelBuilder(discriminator, torch.optim.SGD, dict(
     lr=0.1,
     momentum=0.5
@@ -59,11 +54,6 @@ discriminator_builder = ModelBuilder(discriminator, torch.optim.SGD, dict(
 discriminator_builder.register_scheduler(ExponentialLRScheduler, dict(
     decay_factor=1 / 1.000004,
     min_lr=0.000001
-))
-discriminator_builder.register_scheduler(MomentumScheduler, dict(
-    start=1,
-    saturate=250,
-    final_momentum=0.7
 ))
 trainer = GANTrainer(generator_builder=generator_builder,
                      discriminator_builder=discriminator_builder,
