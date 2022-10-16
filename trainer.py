@@ -113,6 +113,6 @@ class GANTrainer:
         self.logger.on_epoch_start()
         for i in range(epochs):
             d_error, g_error = self.update_trainer(num_train_dis, self.dataloader)    
-            self._log(d_error, g_error, image_freq, i)
+            self._log(d_error, g_error, image_freq, i + 1)
         
         self.logger.on_epoch_end()
