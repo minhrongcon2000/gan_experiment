@@ -23,6 +23,7 @@ class DCGANGenerator(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.project = torch.nn.Linear(100, 4 * 4 * 1024)
+        self.input_dim = 100
         self.model = torch.nn.Sequential(
             torch.nn.ConvTranspose2d(1024, 512, 5, 2, 2, 1, bias=False),
             torch.nn.BatchNorm2d(512),
