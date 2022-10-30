@@ -22,8 +22,6 @@ class GANTrainer:
         self.logger = logger
         self.noise_distribution = noise_distribution
         
-        self.true_label = self.make_true_label(self.batch_size)
-        self.fake_label = self.make_fake_label(self.batch_size)
         self.criterion = torch.nn.BCELoss()
         self.generator, self.g_opt, self.g_scheduler = self.generator_builder.build()
         self.discriminator, self.d_opt, self.d_scheduler = self.discriminator_builder.build()
@@ -42,15 +40,17 @@ class GANTrainer:
         return torch.zeros(batch_size, 1, device=self.device)
     
     def train_discriminator(self, real_data, fake_data):
+        true_label = self.make_true_label(real_data.size(0))
+        fake_label = self.make_fake_label(fake_data.size(0))
         self.d_opt.zero_grad()
         prediction_real = self.discriminator(real_data)
-        error_real = self.criterion(prediction_real, self.true_label)
+        error_real = self.criterion(prediction_real, true_label)
         error_real.backward()
         self.d_opt.step()
         
         self.d_opt.zero_grad()
         prediction_fake = self.discriminator(fake_data)
-        error_fake = self.criterion(prediction_fake, self.fake_label)
+        error_fake = self.criterion(prediction_fake, fake_label)
         error_fake.backward()
         self.d_opt.step()
         
@@ -60,10 +60,11 @@ class GANTrainer:
         return error_real + error_fake
     
     def train_generator(self, fake_data):
+        true_label = self.make_true_label(fake_data.size(0))
         self.g_opt.zero_grad()
         
         prediction = self.discriminator(fake_data)
-        error = self.criterion(prediction, self.true_label)
+        error = self.criterion(prediction, true_label)
         error.backward()
         
         self.g_opt.step()

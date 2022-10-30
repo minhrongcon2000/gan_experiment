@@ -60,5 +60,5 @@ class DCGANDiscriminator(torch.nn.Module):
     
 if __name__ == "__main__":
     model = DCGANDiscriminator()
-    X = torch.randn(1, 3, 64, 64)
+    X = torch.randn(12, 1, 64, 64)
     print(model(X))
