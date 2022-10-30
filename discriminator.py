@@ -65,7 +65,7 @@ class DCGANDiscriminator(torch.nn.Module):
             torch.nn.init.normal_(layer.weight.data, 0, 0.02)
             torch.nn.init.normal_(layer.bias.data, 0, 0.02)
         elif className.find("Batch") != -1:
-            torch.nn.init(layer.weight.data, 0, 0.02)
+            torch.nn.init.normal_(layer.weight.data, 0, 0.02)
             torch.nn.init.constant_(layer.bias.data, 0)
     
     
