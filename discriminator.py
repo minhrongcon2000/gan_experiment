@@ -49,13 +49,23 @@ class DCGANDiscriminator(torch.nn.Module):
             torch.nn.LeakyReLU(0.2),
             torch.nn.Conv2d(512, 1024, 5, 2, 2),
             torch.nn.BatchNorm2d(1024),
+            torch.nn.LeakyReLU(0.2),
             torch.nn.Flatten(),
             torch.nn.Linear(4 * 4 * 1024, 1),
             torch.nn.Sigmoid()
         )
+        self.model.apply(self.init_weights)
         
     def forward(self, X):
         return self.model(X)
+    
+    def init_weights(self, layer: torch.nn.Module):
+        className = layer.__class__.__name__
+        if className.find("Conv") != -1:
+            layer.apply(torch.nn.init.normal_(layer.weight.data, 0, 2))
+        elif className.find("Batch") != -1:
+            layer.apply(torch.nn.init(layer.weight.data, 0, 0.02))
+            layer.apply(torch.nn.init.constant_(layer.bias.data, 0))
     
     
 if __name__ == "__main__":
