@@ -46,10 +46,10 @@ class DCGANGenerator(torch.nn.Module):
     def init_weights(self, layer: torch.nn.Module):
         className = layer.__class__.__name__
         if className.find("Conv") != -1:
-            layer.apply(torch.nn.init.normal_(layer.weight.data, 0, 0.02))
+            torch.nn.init.normal_(layer.weight.data, 0, 0.02)
         elif className.find("Batch") != -1:
-            layer.apply(torch.nn.init(layer.weight.data, 0, 0.02))
-            layer.apply(torch.nn.init.constant_(layer.bias.data, 0))
+            torch.nn.init(layer.weight.data, 0, 0.02)
+            torch.nn.init.constant_(layer.bias.data, 0)
     
 if __name__ == "__main__":
     model = DCGANGenerator()
