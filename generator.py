@@ -34,7 +34,7 @@ class DCGANGenerator(torch.nn.Module):
             torch.nn.ConvTranspose2d(256, 128, 5, 2, 2, 1, bias=False),
             torch.nn.BatchNorm2d(128),
             torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(128, 3, 5, 2, 2, 1, bias=False),
+            torch.nn.ConvTranspose2d(128, 1, 5, 2, 2, 1, bias=False),
             torch.nn.Tanh(),
         )
         

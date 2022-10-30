@@ -39,7 +39,7 @@ class DCGANDiscriminator(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.model = torch.nn.Sequential(
-            torch.nn.Conv2d(3, 128, 5, 2, 2),
+            torch.nn.Conv2d(1, 128, 5, 2, 2),
             torch.nn.LeakyReLU(0.2),
             torch.nn.Conv2d(128, 256, 5, 2, 2),
             torch.nn.BatchNorm2d(256),
