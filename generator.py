@@ -22,9 +22,11 @@ class MNISTGenerator(torch.nn.Module):
 class DCGANGenerator(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        self.project = torch.nn.Linear(100, 4 * 4 * 1024)
         self.input_dim = 100
         self.model = torch.nn.Sequential(
+            torch.nn.ConvTranspose2d(100, 1024, 4, 1, 0, bias=False),
+            torch.nn.BatchNorm2d(1024),
+            torch.nn.ReLU(),
             torch.nn.ConvTranspose2d(1024, 512, 5, 2, 2, 1, bias=False),
             torch.nn.BatchNorm2d(512),
             torch.nn.ReLU(),
@@ -40,8 +42,7 @@ class DCGANGenerator(torch.nn.Module):
         self.model.apply(self.init_weights)
         
     def forward(self, X) -> None:
-        projection = self.project(X).reshape(-1, 1024, 4, 4)
-        return self.model(projection)
+        return self.model(X.reshape(-1, 100, 1, 1))
     
     def init_weights(self, layer: torch.nn.Module):
         className = layer.__class__.__name__
