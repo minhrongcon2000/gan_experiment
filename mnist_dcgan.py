@@ -26,8 +26,8 @@ device = args["device"]
 mean = 0.5
 std = 0.5
 transforms = torchvision.transforms.Compose([
-    torchvision.transforms.ToTensor(),
     torchvision.transforms.Resize(64),
+    torchvision.transforms.ToTensor(),
     torchvision.transforms.Normalize((mean, ), (std, )),
 ])
 
