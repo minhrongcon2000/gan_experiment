@@ -49,7 +49,7 @@ else:
 
 generator = DCGANGenerator()
 discriminator = DCGANDiscriminator()
-noise_distribution = torch.distributions.Uniform(-np.sqrt(3.0), np.sqrt(3.0))
+noise_distribution = torch.distributions.Normal(loc=0., scale=1.)
 generator_builder = ModelBuilder(generator, 
                                  torch.optim.Adam, 
                                  dict(lr=0.0002, betas=(0.5, 0.999)))
