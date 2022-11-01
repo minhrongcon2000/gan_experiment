@@ -1,3 +1,4 @@
+import math
 import torch
 import argparse
 import torchvision
@@ -39,6 +40,9 @@ dataloader = torch.utils.data.DataLoader(mnist,
                                          batch_size=args["batch_size"], 
                                          shuffle=True)
 
+total_iter_per_epoch = math.ceil(len(mnist) / args["batch_size"])
+image_freq = math.ceil((args["epochs"] * total_iter_per_epoch) / 50)
+
 if args['logger_type'] == 'console':
     logger = ConsoleLogger(__name__) 
 else: 
@@ -64,4 +68,5 @@ trainer = GANTrainer(generator_builder=generator_builder,
                      noise_distribution=noise_distribution)
 trainer.run(epochs=args['epochs'], 
             num_train_dis=args['num_train_discriminator'], 
-            post_process=lambda img: 0.5 * img + 0.5)
+            post_process=lambda img: 0.5 * img + 0.5,
+            image_freq=image_freq)
