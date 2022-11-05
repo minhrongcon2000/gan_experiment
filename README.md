@@ -33,3 +33,10 @@ _Learning curve_:
 The curve shows that the generator is generating simple images that the discriminator can distinguish from the real distribution. In my opinion, the discriminator overfits the real distribution in this case; thus, it disregards all images that it does not "memorize" and ends up classifying all images from the generator as fake, making it collapsed.
 
 2. _Training process is susceptible to learning rate_. Adam optimizer doesn't work in GAN training procedure due to its adaptive momentum mechanism making it overshoot the optimal point. I tried several runs with Adam and it turns out to have bad convergence results. (_Note_: This code is using vanilla momentum with SGD)
+
+
+## Trial on DCGAN
+
+![dcgan.gif](./results/dcgan.gif)
+
+_Remark_: I think the image is much more clearer than the case of vanilla GAN but it is still mediocre. Plus, the convergence is unstable.
