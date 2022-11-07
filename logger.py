@@ -35,7 +35,6 @@ class BaseLogger(ABC):
 class ConsoleLogger(BaseLogger):
     def __init__(self, logger_name):
         super().__init__(logger_name)
-        self.epoch_counter = 1
         
     def get_log(self, log_type, log_msg):
         return f'[{log_type}] - {self.logger_name} - {datetime.utcnow().isoformat()} - {log_msg}'
@@ -44,11 +43,11 @@ class ConsoleLogger(BaseLogger):
         print(self.get_log(LogType.INFO, "Training Started!"))
     
     def log(self, msg_object):
-        log_msg = 'Epoch {}, d_loss: {}, g_loss: {}'.format(self.epoch_counter,
-                                                            msg_object['d_loss'],
-                                                            msg_object['g_loss'])
+        log_msg = 'Epoch {}, Step {}, d_loss: {}, g_loss: {}'.format(msg_object['epoch'],
+                                                                     msg_object["current_timestep"],
+                                                                     msg_object['d_loss'],
+                                                                     msg_object['g_loss'])
         print(self.get_log(LogType.INFO, log_msg))
-        self.epoch_counter += 1
         
     def on_epoch_end(self):
         print(self.get_log(LogType.INFO, "Training Finished!"))

@@ -4,6 +4,7 @@ import torchvision
 from builder import ModelBuilder
 
 from logger import BaseLogger, ConsoleLogger
+from utils.loss import WGANLoss
 
 
 class GANTrainer:
@@ -57,7 +58,7 @@ class GANTrainer:
         for scheduler in self.d_scheduler:
             scheduler.step()
         
-        return error_real + error_fake
+        return error_real.item() + error_fake.item()
     
     def train_generator(self, fake_data):
         true_label = self.make_true_label(fake_data.size(0))
@@ -72,23 +73,36 @@ class GANTrainer:
         for scheduler in self.g_scheduler:
             scheduler.step()
         
-        return error
+        return error.item()
     
-    def _log(self, d_error, g_error, image_freq, current_timestep, post_process=None):
+    def _log(self, 
+             epoch,
+             d_error, 
+             g_error, 
+             image_freq, 
+             current_timestep, 
+             post_process=None):
         # generate test image since GAN does not have performance guarantee
         imgs = self.generator(self.test_noise).cpu().detach()
         if post_process is not None:
             imgs = post_process(imgs)
         imgs = torchvision.utils.make_grid(imgs)
-        msg = dict(d_loss=d_error,
+        msg = dict(epoch=epoch,
+                   d_loss=d_error,
                    g_loss=g_error,
                    generator=self.generator,
+                   current_timestep=current_timestep,
                    model_dir="model")
         if current_timestep % image_freq == 0:
             msg['image'] = self.toImage(imgs)
         self.logger.log(msg)
     
-    def update_trainer(self, num_train_dis, dataloader, post_process, image_freq):
+    def update_trainer(self, 
+                       num_train_dis, 
+                       dataloader, 
+                       post_process, 
+                       image_freq,
+                       epoch):
         g_error = 0
         d_error = 0
         
@@ -98,12 +112,17 @@ class GANTrainer:
                 fake_data = self.generator(self.make_noise(imgs.size(0), 
                                                            self.generator.input_dim)).detach()
                 real_data = imgs.to(self.device)
-                d_error = self.train_discriminator(real_data, fake_data) / real_data.size(0)
+                d_error = self.train_discriminator(real_data, fake_data)
                 
             # Train generator afterwards
             fake_data = self.generator(self.make_noise(imgs.size(0), self.generator.input_dim))
-            g_error = self.train_generator(fake_data) / fake_data.size(0)
-            self._log(d_error, g_error, image_freq, i + 1, post_process=post_process)
+            g_error = self.train_generator(fake_data)
+            self._log(d_error, 
+                      g_error, 
+                      image_freq, 
+                      current_timestep=i + 1,
+                      epoch=epoch, 
+                      post_process=post_process)
     
     def run(self, 
             epochs: int=10, 
@@ -114,6 +133,61 @@ class GANTrainer:
         self.discriminator.train()
         
         self.logger.on_epoch_start()
-        for _ in range(epochs):
-            self.update_trainer(num_train_dis, self.dataloader, post_process, image_freq)
+        for epoch in range(epochs):
+            self.update_trainer(num_train_dis, 
+                                self.dataloader, 
+                                post_process, 
+                                image_freq,
+                                epoch)
         self.logger.on_epoch_end()
+        
+        
+class WGANTrainer(GANTrainer):
+    def __init__(self, 
+                 generator_builder: ModelBuilder, 
+                 discriminator_builder: ModelBuilder, 
+                 noise_distribution: torch.distributions.Distribution, 
+                 dataloader: torch.utils.data.DataLoader, 
+                 device: str, 
+                 logger: BaseLogger = ConsoleLogger(__name__),
+                 clip: float=0.01) -> None:
+        super().__init__(generator_builder, 
+                         discriminator_builder, 
+                         noise_distribution, 
+                         dataloader, 
+                         device, 
+                         logger)
+        self.clip = clip
+        self.criterion = WGANLoss()
+        
+    def train_generator(self, fake_data):
+        prediction_fake = self.discriminator(fake_data)
+        
+        self.g_opt.zero_grad()
+        error = self.criterion(prediction_fake)
+        error.backward()
+        self.g_opt.step()
+        
+        for scheduler in self.g_scheduler:
+            scheduler.step()
+        
+        return error.item()
+    
+    def train_discriminator(self, real_data, fake_data):
+        prediction_real = self.discriminator(real_data)
+        prediction_fake = self.discriminator(fake_data)
+        
+        self.d_opt.zero_grad()
+        error_d = -self.criterion(prediction_fake, prediction_real)
+        error_d.backward()
+        self.d_opt.step()
+        
+        for scheduler in self.d_scheduler:
+            scheduler.step()
+            
+        # clip parameter of discriminator
+        for p in self.discriminator.parameters():
+            p.data.clamp_(-self.clip, self.clip)
+        
+        return error_d.item()
+        
