@@ -39,19 +39,19 @@ class DCGANDiscriminator(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.model = torch.nn.Sequential(
-            torch.nn.Conv2d(1, 128, 5, 2, 2),
+            torch.nn.Conv2d(1, 128, 5, 2, 2, bias=False),
             torch.nn.LeakyReLU(0.2),
-            torch.nn.Conv2d(128, 256, 5, 2, 2),
+            torch.nn.Conv2d(128, 256, 5, 2, 2, bias=False),
             torch.nn.BatchNorm2d(256),
             torch.nn.LeakyReLU(0.2),
-            torch.nn.Conv2d(256, 512, 5, 2, 2),
+            torch.nn.Conv2d(256, 512, 5, 2, 2, bias=False),
             torch.nn.BatchNorm2d(512),
             torch.nn.LeakyReLU(0.2),
-            torch.nn.Conv2d(512, 1024, 5, 2, 2),
+            torch.nn.Conv2d(512, 1024, 5, 2, 2, bias=False),
             torch.nn.BatchNorm2d(1024),
             torch.nn.LeakyReLU(0.2),
             torch.nn.Flatten(),
-            torch.nn.Linear(4 * 4 * 1024, 1),
+            torch.nn.Linear(4 * 4 * 1024, 1, bias=False),
             torch.nn.Sigmoid()
         )
         self.model.apply(self.init_weights)
@@ -63,8 +63,6 @@ class DCGANDiscriminator(torch.nn.Module):
         className = layer.__class__.__name__
         if className.find("Conv") != -1:
             torch.nn.init.normal_(layer.weight.data, 0, 0.02)
-            if layer.bias is not None:
-                torch.nn.init.normal_(layer.bias.data, 0, 0.02)
         elif className.find("Batch") != -1:
             torch.nn.init.normal_(layer.weight.data, 1.0, 0.02)
             torch.nn.init.constant_(layer.bias.data, 0)

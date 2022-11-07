@@ -103,7 +103,7 @@ class GANTrainer:
             # Train generator afterwards
             fake_data = self.generator(self.make_noise(imgs.size(0), self.generator.input_dim))
             g_error = self.train_generator(fake_data) / fake_data.size(0)
-            self._log(d_error, g_error, image_freq, i + 1, post_process=post_process)
+        return d_error, g_error
     
     def run(self, 
             epochs: int=10, 
@@ -114,6 +114,7 @@ class GANTrainer:
         self.discriminator.train()
         
         self.logger.on_epoch_start()
-        for _ in range(epochs):
-            self.update_trainer(num_train_dis, self.dataloader, post_process, image_freq)
+        for i in range(epochs):
+            d_error, g_error = self.update_trainer(num_train_dis, self.dataloader, post_process, image_freq)
+            self._log(d_error, g_error, image_freq, i + 1, post_process=post_process)
         self.logger.on_epoch_end()

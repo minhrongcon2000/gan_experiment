@@ -40,8 +40,8 @@ dataloader = torch.utils.data.DataLoader(mnist,
                                          batch_size=args["batch_size"], 
                                          shuffle=True)
 
-total_iter_per_epoch = math.ceil(len(mnist) / args["batch_size"])
-image_freq = math.ceil((args["epochs"] * total_iter_per_epoch) / 50)
+
+image_freq = math.ceil(args["epochs"] / 50)
 
 if args['logger_type'] == 'console':
     logger = ConsoleLogger(__name__) 
