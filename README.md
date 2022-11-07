@@ -34,9 +34,18 @@ The curve shows that the generator is generating simple images that the discrimi
 
 2. _Training process is susceptible to learning rate_. Adam optimizer doesn't work in GAN training procedure due to its adaptive momentum mechanism making it overshoot the optimal point. I tried several runs with Adam and it turns out to have bad convergence results. (_Note_: This code is using vanilla momentum with SGD)
 
-
 ## Trial on DCGAN
 
 ![dcgan.gif](./results/dcgan.gif)
 
-_Remark_: I think the image is much more clearer than the case of vanilla GAN but it is still mediocre. Plus, the convergence is unstable.
+Learning curve
+
+![dc_gan_learning_curve](./results/dcgan_learning_curve.png)
+
+_Remark_:
+
+1. DCGAN is EXTREMELY UNSTABLE. As you can see, even with the same hyperparameter as stated in the author [paper](https://arxiv.org/abs/1511.06434v2), it does not guarantee that it will have a good result as in the author's appendix.
+
+2. The instability of DCGAN is at the batch level. This means that after each batch of data, the quality of the image is heavily influence.
+
+3. When training too long with DCGAN, it diverges. In this case, the generator becomes so good that the discriminator becomes completely off and stops learning entirely. This also proves the sensitivity of DCGAN.
