@@ -74,7 +74,7 @@ class GANTrainer:
         
         return error
     
-    def _log(self, d_error, g_error, image_freq, current_epoch, post_process=None):
+    def _log(self, d_error, g_error, image_freq, current_timestep, post_process=None):
         # generate test image since GAN does not have performance guarantee
         imgs = self.generator(self.test_noise).cpu().detach()
         if post_process is not None:
@@ -84,7 +84,7 @@ class GANTrainer:
                    g_loss=g_error,
                    generator=self.generator,
                    model_dir="model")
-        if current_epoch % image_freq == 0:
+        if current_timestep % image_freq == 0:
             msg['image'] = self.toImage(imgs)
         self.logger.log(msg)
     
@@ -103,7 +103,7 @@ class GANTrainer:
             # Train generator afterwards
             fake_data = self.generator(self.make_noise(imgs.size(0), self.generator.input_dim))
             g_error = self.train_generator(fake_data) / fake_data.size(0)
-        return d_error, g_error
+            self._log(d_error, g_error, image_freq, i + 1, post_process=post_process)
     
     def run(self, 
             epochs: int=10, 
@@ -114,7 +114,6 @@ class GANTrainer:
         self.discriminator.train()
         
         self.logger.on_epoch_start()
-        for i in range(epochs):
-            d_error, g_error = self.update_trainer(num_train_dis, self.dataloader, post_process, image_freq)
-            self._log(d_error, g_error, image_freq, i + 1, post_process=post_process)
+        for _ in range(epochs):
+            self.update_trainer(num_train_dis, self.dataloader, post_process, image_freq)
         self.logger.on_epoch_end()
