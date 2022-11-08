@@ -36,7 +36,7 @@ class MNISTDiscriminator(torch.nn.Module):
 
 
 class DCGANDiscriminator(torch.nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, sigmoid_applied=True) -> None:
         super().__init__()
         self.model = torch.nn.Sequential(
             torch.nn.Conv2d(1, 128, 5, 2, 2, bias=False),
@@ -51,12 +51,16 @@ class DCGANDiscriminator(torch.nn.Module):
             torch.nn.BatchNorm2d(1024),
             torch.nn.LeakyReLU(0.2),
             torch.nn.Flatten(),
-            torch.nn.Linear(4 * 4 * 1024, 1, bias=False),
-            torch.nn.Sigmoid()
+            torch.nn.Linear(4 * 4 * 1024, 1, bias=False)
         )
+        self.sigmoid_applied = sigmoid_applied
+        if self.sigmoid_applied:
+            self.sigmoid = torch.nn.Sigmoid()
         self.model.apply(self.init_weights)
         
     def forward(self, X):
+        if self.sigmoid_applied:
+            return self.sigmoid(self.model(X))
         return self.model(X)
     
     def init_weights(self, layer: torch.nn.Module):
