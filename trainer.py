@@ -106,23 +106,23 @@ class GANTrainer:
         g_error = 0
         d_error = 0
         
-        for i, (imgs, _) in enumerate(dataloader):
-            # Train discriminator first with some degree of update
-            for _ in range(num_train_dis):
+        for _ in range(num_train_dis):
+            for i, (imgs, _) in enumerate(dataloader):
+                # Train discriminator first with some degree of update
                 fake_data = self.generator(self.make_noise(imgs.size(0), 
-                                                           self.generator.input_dim)).detach()
+                                                        self.generator.input_dim)).detach()
                 real_data = imgs.to(self.device)
                 d_error = self.train_discriminator(real_data, fake_data)
                 
-            # Train generator afterwards
-            fake_data = self.generator(self.make_noise(imgs.size(0), self.generator.input_dim))
-            g_error = self.train_generator(fake_data)
-            self._log(epoch,
-                      d_error, 
-                      g_error, 
-                      image_freq, 
-                      current_timestep=i + 1,
-                      post_process=post_process)
+        # Train generator afterwards
+        fake_data = self.generator(self.make_noise(imgs.size(0), self.generator.input_dim))
+        g_error = self.train_generator(fake_data)
+        self._log(epoch,
+                  d_error, 
+                  g_error, 
+                  image_freq, 
+                  current_timestep=i + 1,
+                  post_process=post_process)
     
     def run(self, 
             epochs: int=10, 
