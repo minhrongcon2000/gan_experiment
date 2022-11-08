@@ -49,3 +49,13 @@ _Remark_:
 2. The instability of DCGAN is at the batch level. This means that after each batch of data, the quality of the image is heavily influence.
 
 3. When training too long with DCGAN, it diverges. In this case, the generator becomes so good that the discriminator becomes completely off and stops learning entirely. This also proves the sensitivity of DCGAN.
+
+## Trial on DC-WGAN
+
+![dcwgan](./results/dcwgan.gif)
+
+Learning curve
+
+![dcwgan_learning_curve](./results/dcwgan_learning_curve.png)
+
+The result is worse than DCGAN but shows stable convergence
