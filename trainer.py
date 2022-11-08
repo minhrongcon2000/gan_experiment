@@ -117,11 +117,11 @@ class GANTrainer:
             # Train generator afterwards
             fake_data = self.generator(self.make_noise(imgs.size(0), self.generator.input_dim))
             g_error = self.train_generator(fake_data)
-            self._log(d_error, 
+            self._log(epoch,
+                      d_error, 
                       g_error, 
                       image_freq, 
                       current_timestep=i + 1,
-                      epoch=epoch, 
                       post_process=post_process)
     
     def run(self, 
