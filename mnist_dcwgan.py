@@ -59,7 +59,7 @@ generator_builder = ModelBuilder(generator,
                                  torch.optim.RMSprop, 
                                  dict(lr=0.00005))
 discriminator_builder = ModelBuilder(discriminator,
-                                     torch.optim.Adam, 
+                                     torch.optim.RMSprop, 
                                      dict(lr=0.00005))
 trainer = WGANTrainer(generator_builder=generator_builder,
                      discriminator_builder=discriminator_builder,

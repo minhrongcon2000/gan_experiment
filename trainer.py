@@ -189,5 +189,5 @@ class WGANTrainer(GANTrainer):
         for p in self.discriminator.parameters():
             p.data.clamp_(-self.clip, self.clip)
         
-        return error_d.item()
+        return -error_d.item()
         
