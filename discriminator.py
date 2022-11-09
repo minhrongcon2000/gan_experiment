@@ -51,7 +51,6 @@ class DCGANDiscriminator(torch.nn.Module):
             torch.nn.BatchNorm2d(512),
             torch.nn.LeakyReLU(0.2, inplace=True),
             torch.nn.Conv2d(512, 1, 4, 1, 0, bias=False),
-            torch.nn.Sigmoid(),
             torch.nn.Flatten()
         )
         self.sigmoid_applied = sigmoid_applied
