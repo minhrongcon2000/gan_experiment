@@ -41,7 +41,7 @@ dataloader = torch.utils.data.DataLoader(mnist,
                                          shuffle=True)
 
 
-image_freq = args["batch_size"] // 50 # prevent image logging bottleneck
+image_freq = args["batch_size"] // 50 + 1 # prevent image logging bottleneck
 
 if args['logger_type'] == 'console':
     logger = ConsoleLogger(__name__) 
