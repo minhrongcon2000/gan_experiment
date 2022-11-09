@@ -80,7 +80,6 @@ class GANTrainer:
              d_error, 
              g_error, 
              image_freq, 
-             current_timestep, 
              post_process=None):
         # generate test image since GAN does not have performance guarantee
         imgs = self.generator(self.test_noise).cpu().detach()
@@ -91,9 +90,8 @@ class GANTrainer:
                    d_loss=d_error,
                    g_loss=g_error,
                    generator=self.generator,
-                   current_timestep=current_timestep,
                    model_dir="model")
-        if current_timestep % image_freq == 0:
+        if epoch % image_freq == 0:
             msg['image'] = self.toImage(imgs)
         self.logger.log(msg)
     
@@ -121,7 +119,6 @@ class GANTrainer:
                   d_error, 
                   g_error, 
                   image_freq, 
-                  current_timestep=i + 1,
                   post_process=post_process)
     
     def run(self, 
