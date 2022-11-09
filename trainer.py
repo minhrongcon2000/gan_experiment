@@ -216,7 +216,7 @@ class WGANGPTrainer(WGANTrainer):
         prediction_fake = self.discriminator(fake_data)
         N, C, H, W = real_data.shape
         eps = torch.rand(N, 1, 1, 1).repeat(1, C, H, W).to(self.device)
-        interpolation = eps * prediction_real + (1 - eps) * prediction_fake
+        interpolation = eps * real_data + (1 - eps) * fake_data
         prediction_interpolate = self.discriminator(interpolation)
         
         self.d_opt.zero_grad()
