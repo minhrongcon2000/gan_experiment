@@ -57,11 +57,11 @@ discriminator = DCGANDiscriminator(sigmoid_applied=False)
 noise_distribution = torch.distributions.Normal(loc=0., scale=1.)
 generator_builder = ModelBuilder(generator, 
                                  torch.optim.Adam, 
-                                 dict(lr=0.0001, 
+                                 dict(lr=1e-4, 
                                       betas=(0, 0.9)))
 discriminator_builder = ModelBuilder(discriminator,
                                      torch.optim.Adam, 
-                                     dict(lr=0.0001, 
+                                     dict(lr=1e-4, 
                                           betas=(0, 0.9)))
 trainer = WGANGPTrainer(generator_builder=generator_builder,
                      discriminator_builder=discriminator_builder,
