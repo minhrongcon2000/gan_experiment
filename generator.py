@@ -24,19 +24,19 @@ class DCGANGenerator(torch.nn.Module):
         super().__init__()
         self.input_dim = 100
         self.model = torch.nn.Sequential(
-            torch.nn.ConvTranspose2d(100, 1024, 4, 1, 0, bias=False),
-            torch.nn.BatchNorm2d(1024),
-            torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(1024, 512, 5, 2, 2, 1, bias=False),
+            torch.nn.ConvTranspose2d(100, 512, 4, 1, 0, bias=False),
             torch.nn.BatchNorm2d(512),
-            torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(512, 256, 5, 2, 2, 1, bias=False),
+            torch.nn.ReLU(True),
+            torch.nn.ConvTranspose2d(512, 256, 4, 2, 1, bias=False),
             torch.nn.BatchNorm2d(256),
-            torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(256, 128, 5, 2, 2, 1, bias=False),
+            torch.nn.ReLU(True),
+            torch.nn.ConvTranspose2d(256, 128, 4, 2, 1, bias=False),
             torch.nn.BatchNorm2d(128),
-            torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(128, 1, 5, 2, 2, 1, bias=False),
+            torch.nn.ReLU(True),
+            torch.nn.ConvTranspose2d(128, 64, 4, 2, 1, bias=False),
+            torch.nn.BatchNorm2d(64),
+            torch.nn.ReLU(True),
+            torch.nn.ConvTranspose2d(64, 1, 4, 2, 1, bias=False),
             torch.nn.Tanh(),
         )
         self.model.apply(self.init_weights)

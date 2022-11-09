@@ -39,19 +39,20 @@ class DCGANDiscriminator(torch.nn.Module):
     def __init__(self, sigmoid_applied=True) -> None:
         super().__init__()
         self.model = torch.nn.Sequential(
-            torch.nn.Conv2d(1, 128, 5, 2, 2, bias=False),
-            torch.nn.LeakyReLU(0.2),
-            torch.nn.Conv2d(128, 256, 5, 2, 2, bias=False),
+            torch.nn.Conv2d(1, 64, 4, 2, 1, bias=False),
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Conv2d(64, 128, 4, 2, 1, bias=False),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Conv2d(128, 256, 4, 2, 1, bias=False),
             torch.nn.BatchNorm2d(256),
-            torch.nn.LeakyReLU(0.2),
-            torch.nn.Conv2d(256, 512, 5, 2, 2, bias=False),
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Conv2d(256, 512, 4, 2, 1, bias=False),
             torch.nn.BatchNorm2d(512),
-            torch.nn.LeakyReLU(0.2),
-            torch.nn.Conv2d(512, 1024, 5, 2, 2, bias=False),
-            torch.nn.BatchNorm2d(1024),
-            torch.nn.LeakyReLU(0.2),
-            torch.nn.Flatten(),
-            torch.nn.Linear(4 * 4 * 1024, 1, bias=False)
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Conv2d(512, 1, 4, 1, 0, bias=False),
+            torch.nn.Sigmoid(),
+            torch.nn.Flatten()
         )
         self.sigmoid_applied = sigmoid_applied
         if self.sigmoid_applied:
@@ -75,4 +76,4 @@ class DCGANDiscriminator(torch.nn.Module):
 if __name__ == "__main__":
     model = DCGANDiscriminator()
     X = torch.randn(12, 1, 64, 64)
-    print(model(X))
+    print(model(X).shape)

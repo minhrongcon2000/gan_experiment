@@ -43,14 +43,15 @@ class GANTrainer:
     def train_discriminator(self, real_data, fake_data):
         true_label = self.make_true_label(real_data.size(0))
         fake_label = self.make_fake_label(fake_data.size(0))
-        self.d_opt.zero_grad()
+        
         prediction_real = self.discriminator(real_data)
+        self.d_opt.zero_grad()
         error_real = self.criterion(prediction_real, true_label)
         error_real.backward()
         self.d_opt.step()
         
-        self.d_opt.zero_grad()
         prediction_fake = self.discriminator(fake_data)
+        self.d_opt.zero_grad()
         error_fake = self.criterion(prediction_fake, fake_label)
         error_fake.backward()
         self.d_opt.step()
@@ -62,12 +63,11 @@ class GANTrainer:
     
     def train_generator(self, fake_data):
         true_label = self.make_true_label(fake_data.size(0))
-        self.g_opt.zero_grad()
-        
         prediction = self.discriminator(fake_data)
+        
+        self.g_opt.zero_grad()
         error = self.criterion(prediction, true_label)
         error.backward()
-        
         self.g_opt.step()
         
         for scheduler in self.g_scheduler:
