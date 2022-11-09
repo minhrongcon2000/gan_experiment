@@ -43,9 +43,10 @@ class ConsoleLogger(BaseLogger):
         print(self.get_log(LogType.INFO, "Training Started!"))
     
     def log(self, msg_object):
-        log_msg = 'Epoch {}, d_loss: {}, g_loss: {}'.format(msg_object['epoch'],
-                                                            msg_object['d_loss'],
-                                                            msg_object['g_loss'])
+        log_msg = 'Epoch {}, Step {}, d_loss: {}, g_loss: {}'.format(msg_object['epoch'],
+                                                                     msg_object['current_timestep'],
+                                                                     msg_object['d_loss'],
+                                                                     msg_object['g_loss'])
         print(self.get_log(LogType.INFO, log_msg))
         
     def on_epoch_end(self):

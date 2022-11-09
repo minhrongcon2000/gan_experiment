@@ -80,6 +80,7 @@ class GANTrainer:
              d_error, 
              g_error, 
              image_freq, 
+             current_timestep,
              post_process=None):
         # generate test image since GAN does not have performance guarantee
         imgs = self.generator(self.test_noise).cpu().detach()
@@ -90,8 +91,9 @@ class GANTrainer:
                    d_loss=d_error,
                    g_loss=g_error,
                    generator=self.generator,
+                   current_timestep=current_timestep,
                    model_dir="model")
-        if epoch % image_freq == 0:
+        if current_timestep % image_freq == 0:
             msg['image'] = self.toImage(imgs)
         self.logger.log(msg)
     
@@ -104,22 +106,23 @@ class GANTrainer:
         g_error = 0
         d_error = 0
         
-        for _ in range(num_train_dis):
-            for i, (imgs, _) in enumerate(dataloader):
+        for i, (imgs, _) in enumerate(dataloader):
+            for _ in range(num_train_dis):
                 # Train discriminator first with some degree of update
                 fake_data = self.generator(self.make_noise(imgs.size(0), 
                                                         self.generator.input_dim)).detach()
                 real_data = imgs.to(self.device)
                 d_error = self.train_discriminator(real_data, fake_data)
                 
-        # Train generator afterwards
-        fake_data = self.generator(self.make_noise(imgs.size(0), self.generator.input_dim))
-        g_error = self.train_generator(fake_data)
-        self._log(epoch,
-                  d_error, 
-                  g_error, 
-                  image_freq, 
-                  post_process=post_process)
+            # Train generator afterwards
+            fake_data = self.generator(self.make_noise(imgs.size(0), self.generator.input_dim))
+            g_error = self.train_generator(fake_data)
+            self._log(epoch,
+                      d_error, 
+                      g_error, 
+                      image_freq, 
+                      current_timestep=i,
+                      post_process=post_process)
     
     def run(self, 
             epochs: int=10, 

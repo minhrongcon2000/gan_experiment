@@ -41,7 +41,8 @@ dataloader = torch.utils.data.DataLoader(mnist,
                                          shuffle=True)
 
 
-image_freq = math.ceil(args["epochs"] / 50) # prevent image logging bottleneck
+total_iter_per_epoch = math.ceil(len(mnist) / dataloader.batch_size)
+image_freq = math.ceil(total_iter_per_epoch * args["epochs"] / 50)
 
 if args['logger_type'] == 'console':
     logger = ConsoleLogger(__name__) 
