@@ -190,4 +190,45 @@ class WGANTrainer(GANTrainer):
             p.data.clamp_(-self.clip, self.clip)
         
         return -error_d.item()
+    
+
+class WGANGPTrainer(WGANTrainer):
+    def __init__(self, 
+                 generator_builder: ModelBuilder, 
+                 discriminator_builder: ModelBuilder, 
+                 noise_distribution: torch.distributions.Distribution, 
+                 dataloader: torch.utils.data.DataLoader, 
+                 device: str, 
+                 logger: BaseLogger = ConsoleLogger(__name__), 
+                 clip: float = 0.01,
+                 l: float=10.) -> None:
+        super().__init__(generator_builder, 
+                         discriminator_builder, 
+                         noise_distribution, 
+                         dataloader, 
+                         device, 
+                         logger, 
+                         clip)
+        self.l = l
         
+    def train_discriminator(self, real_data, fake_data):
+        prediction_real = self.discriminator(real_data)
+        prediction_fake = self.discriminator(fake_data)
+        N, C, H, W = real_data.shape
+        eps = torch.rand(N, 1, 1, 1).repeat(1, C, H, W).to(self.device)
+        interpolation = eps * prediction_real + (1 - eps) * prediction_fake
+        prediction_interpolate = self.discriminator(interpolation)
+        
+        self.d_opt.zero_grad()
+        error_d = -self.criterion(prediction_fake, 
+                                  prediction_real, 
+                                  interpolate=(interpolation, 
+                                               prediction_interpolate),
+                                  l=self.l)
+        error_d.backward()
+        self.d_opt.step()
+        
+        for scheduler in self.d_scheduler:
+            scheduler.step()
+        
+        return error_d.item()
