@@ -213,7 +213,7 @@ class WGANGPTrainer(WGANTrainer):
         
     def train_discriminator(self, real_data: torch.Tensor, fake_data: torch.Tensor):
         prediction_real = self.discriminator(real_data)
-        prediction_fake = self.discriminator(fake_data)
+        prediction_fake = self.discriminator(fake_data.detach())
         N, C, H, W = real_data.shape
         eps = torch.rand(N, 1, 1, 1).repeat(1, C, H, W).to(self.device)
         interpolation = eps * real_data + (1 - eps) * fake_data
