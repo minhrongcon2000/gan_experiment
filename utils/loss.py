@@ -16,6 +16,7 @@ class WGANLoss(torch.nn.Module):
             gradient = torch.autograd.grad(
                 inputs=interpolate_img,
                 outputs=interpolate_pred,
+                grad_outputs=torch.ones_like(interpolate_pred),
                 create_graph=True
             )[0]
             gradient = gradient.view(gradient.shape[0], -1)
