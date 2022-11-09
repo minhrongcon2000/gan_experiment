@@ -50,7 +50,7 @@ class GANTrainer:
         error_real.backward()
         self.d_opt.step()
         
-        prediction_fake = self.discriminator(fake_data)
+        prediction_fake = self.discriminator(fake_data.detach())
         self.d_opt.zero_grad()
         error_fake = self.criterion(prediction_fake, fake_label)
         error_fake.backward()
@@ -110,7 +110,7 @@ class GANTrainer:
             for _ in range(num_train_dis):
                 # Train discriminator first with some degree of update
                 fake_data = self.generator(self.make_noise(imgs.size(0), 
-                                                        self.generator.input_dim)).detach()
+                                                        self.generator.input_dim))
                 real_data = imgs.to(self.device)
                 d_error = self.train_discriminator(real_data, fake_data)
                 
@@ -218,7 +218,6 @@ class WGANGPTrainer(WGANTrainer):
         eps = torch.rand(N, 1, 1, 1).repeat(1, C, H, W).to(self.device)
         interpolation = eps * real_data + (1 - eps) * fake_data
         prediction_interpolate = self.discriminator(interpolation)
-        print(interpolation.requires_grad, prediction_interpolate.requires_grad)
         
         self.d_opt.zero_grad()
         error_d = -self.criterion(prediction_fake, 
