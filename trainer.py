@@ -217,8 +217,8 @@ class WGANGPTrainer(WGANTrainer):
         N, C, H, W = real_data.shape
         eps = torch.rand(N, 1, 1, 1).repeat(1, C, H, W).to(self.device)
         interpolation = eps * real_data + (1 - eps) * fake_data
-        interpolation.requires_grad_ = True
         prediction_interpolate = self.discriminator(interpolation)
+        print(interpolation.requires_grad, prediction_interpolate.requires_grad)
         
         self.d_opt.zero_grad()
         error_d = -self.criterion(prediction_fake, 
